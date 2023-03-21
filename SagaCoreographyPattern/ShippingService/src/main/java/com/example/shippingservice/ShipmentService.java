@@ -1,5 +1,11 @@
 package com.example.shippingservice;
 
+import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
+
+import java.util.Optional;
+
 @Service
 public class ShipmentService {
     private final ShipmentRepository shipmentRepository;
