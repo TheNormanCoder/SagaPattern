@@ -1,5 +1,8 @@
 package com.example.orderservice;
 
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.stereotype.Service;
+
 @Service
 public class OrderService {
     private final OrderRepository orderRepository;
