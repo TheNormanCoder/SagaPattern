@@ -1,0 +1,16 @@
+# Usa l'immagine ufficiale di OpenJDK come base
+FROM openjdk:11-jdk-slim
+
+# Imposta variabili d'ambiente per l'app
+ARG JAR_FILE=target/*.jar
+ENV APP_HOME=/app
+
+# Crea la directory dell'app e copia il file JAR
+WORKDIR $APP_HOME
+COPY ${JAR_FILE} app.jar
+
+# Espone la porta su cui il servizio sarà in ascolto
+EXPOSE 8082
+
+# Avvia l'app
+ENTRYPOINT ["java", "-jar", "app.jar"]
