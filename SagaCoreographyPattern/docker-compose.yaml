@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  orderservice:
+    build: ./OrderService
+    container_name: orderservice
+    ports:
+      - '8081:8081'
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+
+  shippingservice:
+    build: ./ShippingService
+    container_name: shippingservice
+    ports:
+      - '8082:8082'
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+
+  paymentservice:
+    build: ./PaymentService
+    container_name: paymentservice
+    ports:
+      - '8083:8083'
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
