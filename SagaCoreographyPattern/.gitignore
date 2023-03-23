@@ -1,2 +1,5 @@
 /.idea
 *.iml
+SagaCoreographyPattern.iml
+*/target/
+*.class
