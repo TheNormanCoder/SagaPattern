@@ -1,5 +1,5 @@
 package com.example.paymentservice;
 
 public enum PaymentStatus {
-    PENDING, SUCCEEDED, FAILED
+    PENDING, SUCCEEDED, CONFIRMED, CANCELLED, FAILED
 }

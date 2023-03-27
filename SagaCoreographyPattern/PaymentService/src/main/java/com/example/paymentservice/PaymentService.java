@@ -34,4 +34,28 @@ public class PaymentService {
         PaymentStatusChangedEvent statusChangedEvent = new PaymentStatusChangedEvent(savedPayment.getOrderId(), savedPayment.getStatus());
         kafkaTemplate.send("payment-status-changed", statusChangedEvent);
     }
+
+    @KafkaListener(topics = "shipment-status-changed", groupId = "payment-service")
+    public void onShipmentStatusChanged(ShipmentStatusChangedEvent event) {
+        // Trova il pagamento corrispondente all'ID dell'ordine ricevuto nell'evento
+        Optional<Payment> optionalPayment = findByOrderId(event.getOrderId());
+
+        if (optionalPayment.isPresent()) {
+            Payment payment = optionalPayment.get();
+
+            // Aggiorna lo stato del pagamento in base allo stato della spedizione
+            if (event.getStatus() == ShipmentStatus.COMPLETED) {
+                payment.setStatus(PaymentStatus.CONFIRMED);
+            } else if (event.getStatus() == ShipmentStatus.FAILED) {
+                payment.setStatus(PaymentStatus.CANCELLED);
+            }
+
+            // Salva il pagamento aggiornato nel repository
+            paymentRepository.save(payment);
+
+            // Puoi anche gestire eventuali azioni correlate, come notificare l'utente
+            // Ad esempio, inviare un'email di notifica o aggiornare l'interfaccia utente
+        }
+    }
+
 }

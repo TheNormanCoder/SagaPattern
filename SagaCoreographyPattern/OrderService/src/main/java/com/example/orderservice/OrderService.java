@@ -1,7 +1,10 @@
 package com.example.orderservice;
 
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+
+import java.util.Optional;
 
 @Service
 public class OrderService {
@@ -13,13 +16,34 @@ public class OrderService {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    public Order createOrder(Order order) {
-        order.setStatus(OrderStatus.CREATED);
-        Order savedOrder = orderRepository.save(order);
+    // ... altri metodi esistenti ...
 
-        OrderCreatedEvent event = new OrderCreatedEvent(savedOrder.getId());
-        kafkaTemplate.send("order-created", event);
+    @KafkaListener(topics = "shipment-status-changed", groupId = "order-service")
+    public void onShipmentStatusChanged(ShipmentStatusChangedEvent event) {
+        // Trova l'ordine con l'ID corrispondente
+        Optional<Order> optionalOrder = orderRepository.findById(event.getOrderId());
 
-        return savedOrder;
+        if (optionalOrder.isPresent()) {
+            Order order = optionalOrder.get();
+
+            // Aggiorna lo stato dell'ordine in base allo stato della spedizione
+            switch (event.getStatus()) {
+                case IN_TRANSIT:
+                    order.setStatus(OrderStatus.IN_TRANSIT);
+                    break;
+                case COMPLETED:
+                    order.setStatus(OrderStatus.COMPLETED);
+                    break;
+                case FAILED:
+                    order.setStatus(OrderStatus.FAILED);
+                    // Gestisci eventuali azioni correlate, come annullare l'ordine se la spedizione fallisce
+                    // Ad esempio, potresti notificare l'utente o intraprendere altre azioni necessarie
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unknown shipment status: " + event.getStatus());
+            }
+            orderRepository.save(order);
+
+        }
     }
 }
