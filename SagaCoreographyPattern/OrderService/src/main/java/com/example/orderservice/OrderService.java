@@ -16,7 +16,17 @@ public class OrderService {
         this.kafkaTemplate = kafkaTemplate;
     }
 
-    // ... altri metodi esistenti ...
+    public Order createOrder(Order order) {
+        order.setStatus(OrderStatus.CREATED);
+        Order savedOrder = orderRepository.save(order);
+
+        // Crea l'evento OrderCreated e invialo a Kafka
+        OrderCreatedEvent orderCreatedEvent = new OrderCreatedEvent(savedOrder.getId());
+        kafkaTemplate.send("order-created", orderCreatedEvent);
+
+        return savedOrder;
+    }
+
 
     @KafkaListener(topics = "shipment-status-changed", groupId = "order-service")
     public void onShipmentStatusChanged(ShipmentStatusChangedEvent event) {
